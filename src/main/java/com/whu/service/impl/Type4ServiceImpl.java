@@ -94,7 +94,7 @@ public class Type4ServiceImpl implements Type4Service
             {
                 Collections.sort(gradeList);   //成绩升序排列
                 float total = 0.0f;
-                for(int i = 1; i < gradeNum - 1; i++)
+                for(int i = 0; i < gradeNum ; i++)
                 {
                     total += gradeList.get(i);
                 }
