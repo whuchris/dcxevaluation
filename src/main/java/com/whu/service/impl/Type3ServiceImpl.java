@@ -102,12 +102,12 @@ public class Type3ServiceImpl implements Type3Service
                     if(gradeNum > 2)
                         project.setfGrade((total-gradeList.get(0)-gradeList.get(gradeNum-1)) / (gradeNum - 2 ));
                     else
-                        project.setfGrade(total / (gradeNum));
+                        project.setfGrade(total / gradeNum);
                 else
                     if(gradeNum > 2)
                         project.setlGrade((total-gradeList.get(0)-gradeList.get(gradeNum-1)) / (gradeNum - 2 ));
                     else
-                        project.setlGrade(total / (gradeNum));
+                        project.setlGrade(total / gradeNum);
                 projectMapper.updateProject(project);
             }
             return 1;
