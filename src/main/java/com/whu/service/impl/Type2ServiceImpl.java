@@ -99,15 +99,17 @@ public class Type2ServiceImpl implements Type2Service
                     total += gradeList.get(i);
                 }
                 if(state == 1)
-                    if(gradeNum > 2)
+                    /*if(gradeNum > 2)
                         project.setfGrade((total-gradeList.get(0)-gradeList.get(gradeNum-1)) / (gradeNum - 2 ));
                     else
-                        project.setfGrade(total / (gradeNum));
+                        project.setfGrade(total / (gradeNum));*/ //去掉最高分最低分的版本
+                    project.setfGrade(total / (gradeNum)); //不去掉最高分最低分的版本
                 else
-                    if(gradeNum > 2)
+                    /*if(gradeNum > 2)
                         project.setlGrade((total-gradeList.get(0)-gradeList.get(gradeNum-1)) / (gradeNum - 2 ));
                     else
-                        project.setlGrade(total / (gradeNum));
+                        project.setlGrade(total / (gradeNum));*/ //去掉最高分最低分的版本
+                    project.setlGrade(total / (gradeNum)); //不去掉最高分最低分的版本
                 projectMapper.updateProject(project);
             }
             return 1;
@@ -148,9 +150,19 @@ public class Type2ServiceImpl implements Type2Service
         Map<String, Float> result = new HashMap<>();
         try
         {
-            List<EconoBenefit> econoBenefits = econoBenefitMapper.queryScoresByProjectIdAndState(projectId, state);
-            List<SocialBenefit> socialBenefits = socialBenefitMapper.queryScoresByProjectIdAndState(projectId, state);
-            List<EnvirBenefit2> envirBenefit2s = envirBenefit2Mapper.queryScoresByProjectIdAndState(projectId, state);
+            List<ProjectAssignment> projectAssignments = projectAssignmentMapper.
+                    queryAssignmentsByProjectIdAndStateOrderByGrade(projectId,state);
+
+            //Long maxGradeExpertId = projectAssignments.get(projectAssignments.size() - 1).getExpertId();
+            //Long minGradeExpertId = projectAssignments.get(0).getExpertId();去掉最高分最低分的版本
+
+
+            List<EconoBenefit> econoBenefits = econoBenefitMapper.
+                    queryScoresByProjectIdAndStateOrderByExpertId(projectId, state);
+            List<SocialBenefit> socialBenefits = socialBenefitMapper.
+                    queryScoresByProjectIdAndStateOrderByExpertId(projectId, state);
+            List<EnvirBenefit2> envirBenefit2s = envirBenefit2Mapper.
+                    queryScoresByProjectIdAndStateOrderByExpertId(projectId, state);
             int size = econoBenefits.size();
             float totalOperationPerformance = 0.0f;
             float totalEffect = 0.0f;
@@ -161,26 +173,63 @@ public class Type2ServiceImpl implements Type2Service
             float totalLandUsing = 0.0f;
             for(int i = 0; i < size; ++i)
             {
-                totalOperationPerformance += econoBenefits.get(i).getOperationPerformance();
-                totalEffect += socialBenefits.get(i).getEffect();
-                totalArt += envirBenefit2s.get(i).getArt();
-                totalInformationManagement += envirBenefit2s.get(i).getInformationManagement();
-                totalGreenTransportation += envirBenefit2s.get(i).getGreenTransportation();
-                totalEnvir += envirBenefit2s.get(i).getEnvir();
-                totalLandUsing += envirBenefit2s.get(i).getLandUsing();
+                EnvirBenefit2 envirBenefit2 = envirBenefit2s.get(i);
+                EconoBenefit econoBenefit = econoBenefits.get(i);
+                /*
+                if(size > 2 &&
+                        ((econoBenefit.getExpertId().equals(maxGradeExpertId))
+                                || (econoBenefit.getExpertId().equals(minGradeExpertId))))
+                    continue;*/ //去掉最高分最低分
+                SocialBenefit socialBenefit = socialBenefits.get(i);
+
+                totalOperationPerformance += econoBenefit.getOperationPerformance();
+                totalEffect += socialBenefit.getEffect();
+                totalArt += envirBenefit2.getArt();
+                totalInformationManagement += envirBenefit2.getInformationManagement();
+                totalGreenTransportation += envirBenefit2.getGreenTransportation();
+                totalEnvir += envirBenefit2.getEnvir();
+                totalLandUsing += envirBenefit2.getLandUsing();
             }
-            result.put("avgOperationPerformance", totalOperationPerformance / size);
-            result.put("avgEffect", totalEffect / size);
-            result.put("avgArt", totalArt / size);
-            result.put("avgInformationManagement", totalInformationManagement / size);
-            result.put("avgGreenTransportation", totalGreenTransportation / size);
-            result.put("avgEnvir", totalEnvir / size);
-            result.put("avgLandUsing", totalLandUsing / size);
+            //size = size > 2? (size-2): size; 用于去掉最高分最低分的
+            result.put("avgOperationPerformance", (float)(Math.round(totalOperationPerformance / size*100))/100);
+            result.put("avgEffect", (float)(Math.round(totalEffect / size*100))/100);
+            result.put("avgArt", (float)(Math.round(totalArt / size*100))/100);
+            result.put("avgInformationManagement", (float)(Math.round(totalInformationManagement / size*100))/100);
+            result.put("avgGreenTransportation", (float)(Math.round(totalGreenTransportation / size*100))/100);
+            result.put("avgEnvir", (float)(Math.round(totalEnvir / size*100))/100);
+            result.put("avgLandUsing", (float)(Math.round(totalLandUsing / size*100))/100);
         }
         catch (Exception e)
         {
             return null;
         }
         return result;
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = Exception.class)
+    @Override
+    public int alterType2Score(EnvirBenefit2 envirBenefit2, SocialBenefit socialBenefit, EconoBenefit econoBenefit,
+                               float grade)
+    {
+        try
+        {
+            envirBenefit2Mapper.updateScore(envirBenefit2);
+            socialBenefitMapper.updateScore(socialBenefit);
+            econoBenefitMapper.updateScore(econoBenefit);
+            Long projectId = econoBenefit.getProjectId();
+            ProjectAssignment projectAssignment = projectAssignmentMapper.
+                    queryAssignmentByProjectIdAndExpertIdAndState(projectId,-1L,3);
+            projectAssignment.setGrade(grade);
+            projectAssignmentMapper.updateAssignment(projectAssignment);
+            Project project = projectMapper.queryProjectById(projectId);
+            project.setFinalGrade(grade);
+            projectMapper.updateProject(project);
+        }
+        catch (Exception e)
+        {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return -1;
+        }
+        return 1;
     }
 }

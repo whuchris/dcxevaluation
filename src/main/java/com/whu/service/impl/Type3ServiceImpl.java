@@ -99,15 +99,17 @@ public class Type3ServiceImpl implements Type3Service
                     total += gradeList.get(i);
                 }
                 if(state == 1)
-                    if(gradeNum > 2)
+                    /*if(gradeNum > 2)
                         project.setfGrade((total-gradeList.get(0)-gradeList.get(gradeNum-1)) / (gradeNum - 2 ));
                     else
-                        project.setfGrade(total / gradeNum);
+                        project.setfGrade(total / (gradeNum));*/ //去掉最高分最低分的版本
+                    project.setfGrade(total / (gradeNum)); //不去掉最高分最低分的版本
                 else
-                    if(gradeNum > 2)
+                    /*if(gradeNum > 2)
                         project.setlGrade((total-gradeList.get(0)-gradeList.get(gradeNum-1)) / (gradeNum - 2 ));
                     else
-                        project.setlGrade(total / gradeNum);
+                        project.setlGrade(total / (gradeNum));*/ //去掉最高分最低分的版本
+                    project.setlGrade(total / (gradeNum)); //不去掉最高分最低分的版本
                 projectMapper.updateProject(project);
             }
             return 1;
@@ -148,9 +150,19 @@ public class Type3ServiceImpl implements Type3Service
         Map<String, Float> result = new HashMap<>();
         try
         {
-            List<EconoBenefit> econoBenefits = econoBenefitMapper.queryScoresByProjectIdAndState(projectId, state);
-            List<SocialBenefit> socialBenefits = socialBenefitMapper.queryScoresByProjectIdAndState(projectId, state);
-            List<EnvirBenefit3> envirBenefit3s = envirBenefit3Mapper.queryScoresByProjectIdAndState(projectId, state);
+            List<ProjectAssignment> projectAssignments = projectAssignmentMapper.
+                    queryAssignmentsByProjectIdAndStateOrderByGrade(projectId,state);
+
+            //Long maxGradeExpertId = projectAssignments.get(projectAssignments.size() - 1).getExpertId();
+            //Long minGradeExpertId = projectAssignments.get(0).getExpertId();去掉最高分最低分的版本
+
+
+            List<EconoBenefit> econoBenefits = econoBenefitMapper.
+                    queryScoresByProjectIdAndStateOrderByExpertId(projectId, state);
+            List<SocialBenefit> socialBenefits = socialBenefitMapper.
+                    queryScoresByProjectIdAndStateOrderByExpertId(projectId, state);
+            List<EnvirBenefit3> envirBenefit3s = envirBenefit3Mapper.
+                    queryScoresByProjectIdAndStateOrderByExpertId(projectId, state);
             int size = econoBenefits.size();
             float totalOperationPerformance = 0.0f;
             float totalEffect = 0.0f;
@@ -160,24 +172,61 @@ public class Type3ServiceImpl implements Type3Service
             float totalProjectTechnology = 0.0f;
             for(int i = 0; i < size; ++i)
             {
-                totalOperationPerformance += econoBenefits.get(i).getOperationPerformance();
-                totalEffect += socialBenefits.get(i).getEffect();
-                totalArt += envirBenefit3s.get(i).getArt();
-                totalEnvirFriendliness += envirBenefit3s.get(i).getEnvirFriendliness();
-                totalProjectFunction += envirBenefit3s.get(i).getProjectFunction();
-                totalProjectTechnology += envirBenefit3s.get(i).getProjectTechnology();
+                EnvirBenefit3 envirBenefit3 = envirBenefit3s.get(i);
+                EconoBenefit econoBenefit = econoBenefits.get(i);
+                /*
+                if(size > 2 &&
+                        ((econoBenefit.getExpertId().equals(maxGradeExpertId))
+                                || (econoBenefit.getExpertId().equals(minGradeExpertId))))
+                    continue;*/ //去掉最高分最低分
+                SocialBenefit socialBenefit = socialBenefits.get(i);
+
+                totalOperationPerformance += econoBenefit.getOperationPerformance();
+                totalEffect += socialBenefit.getEffect();
+                totalArt += envirBenefit3.getArt();
+                totalEnvirFriendliness += envirBenefit3.getEnvirFriendliness();
+                totalProjectFunction += envirBenefit3.getProjectFunction();
+                totalProjectTechnology += envirBenefit3.getProjectTechnology();
             }
-            result.put("avgOperationPerformance", totalOperationPerformance / size);
-            result.put("avgEffect", totalEffect / size);
-            result.put("avgArt", totalArt / size);
-            result.put("avgEnvirFriendliness", totalEnvirFriendliness / size);
-            result.put("avgProjectFunction", totalProjectFunction / size);
-            result.put("avgProjectTechnology", totalProjectTechnology / size);
+            //size = size > 2? (size-2): size; 用于去掉最高分最低分的
+            result.put("avgOperationPerformance", (float)(Math.round(totalOperationPerformance / size*100))/100);
+            result.put("avgEffect", (float)(Math.round(totalEffect / size*100))/100);
+            result.put("avgArt", (float)(Math.round(totalArt / size*100))/100);
+            result.put("avgEnvirFriendliness", (float)(Math.round(totalEnvirFriendliness / size*100))/100);
+            result.put("avgProjectFunction", (float)(Math.round(totalProjectFunction / size*100))/100);
+            result.put("avgProjectTechnology", (float)(Math.round(totalProjectTechnology / size*100))/100);
         }
         catch (Exception e)
         {
             return null;
         }
         return result;
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = Exception.class)
+    @Override
+    public int alterType3Score(EnvirBenefit3 envirBenefit3, SocialBenefit socialBenefit, EconoBenefit econoBenefit,
+                               float grade)
+    {
+        try
+        {
+            envirBenefit3Mapper.updateScore(envirBenefit3);
+            socialBenefitMapper.updateScore(socialBenefit);
+            econoBenefitMapper.updateScore(econoBenefit);
+            Long projectId = econoBenefit.getProjectId();
+            ProjectAssignment projectAssignment = projectAssignmentMapper.
+                    queryAssignmentByProjectIdAndExpertIdAndState(projectId,-1L,3);
+            projectAssignment.setGrade(grade);
+            projectAssignmentMapper.updateAssignment(projectAssignment);
+            Project project = projectMapper.queryProjectById(projectId);
+            project.setFinalGrade(grade);
+            projectMapper.updateProject(project);
+        }
+        catch (Exception e)
+        {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return -1;
+        }
+        return 1;
     }
 }

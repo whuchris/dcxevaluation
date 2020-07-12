@@ -2,6 +2,7 @@ package com.whu.service;
 
 import com.whu.FcxevaluationApplicationTests;
 import com.whu.pojo.Expert;
+import com.whu.pojo.Project;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;

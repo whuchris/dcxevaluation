@@ -49,4 +49,12 @@ public class ExpertMapperTest extends FcxevaluationApplicationTests
         experts = expertMapper.queryAllExperts();
         log.info("ExpertMapperTest.queryAllExperts :" + experts);
     }
+
+    @Test
+    public void queryExpertByName()
+    {
+        String name = "戴春";
+        Expert expert = expertMapper.queryExpertByName(name);
+        log.info("ExpertMapperTest.queryExpertByName :" + expert);
+    }
 }

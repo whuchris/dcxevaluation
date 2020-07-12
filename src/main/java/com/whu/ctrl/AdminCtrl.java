@@ -2,14 +2,9 @@ package com.whu.ctrl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.whu.pojo.Admin;
-import com.whu.pojo.Expert;
-import com.whu.pojo.Prize;
-import com.whu.pojo.Project;
-import com.whu.service.AdminService;
-import com.whu.service.ExpertService;
-import com.whu.service.ProjectAssignmentService;
-import com.whu.service.ProjectService;
+import com.whu.mapper.*;
+import com.whu.pojo.*;
+import com.whu.service.*;
 import com.whu.utils.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,6 +34,39 @@ public class AdminCtrl
     @Autowired
     ProjectAssignmentService projectAssignmentService;
 
+    @Autowired
+    EnvirBenefit1Mapper envirBenefit1Mapper;
+
+    @Autowired
+    EnvirBenefit2Mapper envirBenefit2Mapper;
+
+    @Autowired
+    EnvirBenefit3Mapper envirBenefit3Mapper;
+
+    @Autowired
+    EnvirBenefit4Mapper envirBenefit4Mapper;
+
+    @Autowired
+    SocialBenefitMapper socialBenefitMapper;
+
+    @Autowired
+    EconoBenefitMapper econoBenefitMapper;
+
+    @Autowired
+    ProjectAssignmentMapper projectAssignmentMapper;
+
+    @Autowired
+    Type1Service type1Service;
+
+    @Autowired
+    Type2Service type2Service;
+
+    @Autowired
+    Type3Service type3Service;
+
+    @Autowired
+    Type4Service type4Service;
+
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> login(HttpServletRequest request)
@@ -47,9 +75,9 @@ public class AdminCtrl
         Admin admin;
         try
         {
-            JSONObject paramaters = JsonUtil.getRequestJsonObject(request);
-            String username = paramaters.getString("username");
-            String password = paramaters.getString("password");
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            String username = parameters.getString("username");
+            String password = parameters.getString("password");
 
             admin = adminService.queryAdminByUsername(username);
 
@@ -127,10 +155,10 @@ public class AdminCtrl
         try
         {
             List<Long> projectIdList = new ArrayList<>();
-            JSONObject paramaters = JsonUtil.getRequestJsonObject(request);
-            int state = paramaters.getIntValue("state");
-            Long expertId = paramaters.getLong("expertId");
-            JSONArray json = paramaters.getJSONArray("projectIdList");
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            int state = parameters.getIntValue("state");
+            Long expertId = parameters.getLong("expertId");
+            JSONArray json = parameters.getJSONArray("projectIdList");
 
             for(int i = 0; i < json.size(); i++)
                 projectIdList.add(json.getLong(i));
@@ -170,9 +198,9 @@ public class AdminCtrl
         Long id = 0L;
         try
         {
-            JSONObject paramaters = JsonUtil.getRequestJsonObject(request);
-            state = paramaters.getIntValue("state");
-            id = paramaters.getLongValue("id");
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            state = parameters.getIntValue("state");
+            id = parameters.getLongValue("id");
         }
         catch (Exception e)
         {
@@ -194,7 +222,7 @@ public class AdminCtrl
             result.put("errMsg", -2);
             return result;
         }
-        List<Project> projects = projectService.queryAllProjects();
+        List<Project> projects = projectService.queryProjectsByState(state);
         List<Expert> experts = expertService.queryAllExperts();
 
         List<Long> chanChengProjectIdList = new ArrayList<>();
@@ -210,47 +238,54 @@ public class AdminCtrl
         Set<Long> juZhuExpertIdSet = new HashSet<>();
         Set<Long> lvYouExpertIdSet = new HashSet<>();
         Set<Long> shangBanExpertIdSet = new HashSet<>();
+        Set<Long> candidateIdSet = new HashSet<>();
         Set<Long> wenTiExpertIdSet = new HashSet<>();
         Set<Long> yiYangExpertIdSet = new HashSet<>();
 
         for(Project project : projects)
         {
             int type = project.getPrize().getfType();
+            Long projectId = project.getId();
             if(type == 1)
-                chanChengProjectIdList.add(project.getId());
+                chanChengProjectIdList.add(projectId);
             else if(type == 2)
-                chengGengProjectIdList.add(project.getId());
+                chengGengProjectIdList.add(projectId);
             else if(type == 3)
-                juZhuProjectIdList.add(project.getId());
+                juZhuProjectIdList.add(projectId);
             else if(type == 4)
-                lvYouProjectIdList.add(project.getId());
+                lvYouProjectIdList.add(projectId);
             else if(type == 5)
-                shangBanProjectIdList.add(project.getId());
+                shangBanProjectIdList.add(projectId);
             else if(type == 6)
-                wenTiProjectIdList.add(project.getId());
+                wenTiProjectIdList.add(projectId);
             else if(type == 7)
-                yiYangProjectIdList.add(project.getId());
+                yiYangProjectIdList.add(projectId);
         }
 
         for(Expert expert : experts)
         {
-            for(Prize prize : expert.getPrizeList())
+            List<Prize> prizeList = expert.getPrizeList();
+            Long expertId = expert.getId();
+            for(Prize prize : prizeList)
             {
                 int type = prize.getfType();
                 if(type == 1)
-                    chanChengExpertIdSet.add(expert.getId());
+                    chanChengExpertIdSet.add(expertId);
                 if(type == 2)
-                    chengGengExpertIdSet.add(expert.getId());
+                    chengGengExpertIdSet.add(expertId);
                 if(type == 3)
-                    juZhuExpertIdSet.add(expert.getId());
+                    juZhuExpertIdSet.add(expertId);
                 if(type == 4)
-                    lvYouExpertIdSet.add(expert.getId());
+                    lvYouExpertIdSet.add(expertId);
                 if(type == 5)
-                    shangBanExpertIdSet.add(expert.getId());
+                    if(expert.getId() < 38L)
+                        shangBanExpertIdSet.add(expertId);
+                    else
+                        candidateIdSet.add(expertId);
                 if(type == 6)
-                    wenTiExpertIdSet.add(expert.getId());
+                    wenTiExpertIdSet.add(expertId);
                 if(type == 7)
-                    yiYangExpertIdSet.add(expert.getId());
+                    yiYangExpertIdSet.add(expertId);
             }
         }
 
@@ -293,7 +328,8 @@ public class AdminCtrl
             result.put("lvYou", false);
         }
 
-        int code5 = projectAssignmentService.insertAssignments(state, shangBanProjectIdList, shangBanExpertIdSet);
+        int code5 = projectAssignmentService.
+                insertAssignmentsWithCandidate(state, shangBanProjectIdList, shangBanExpertIdSet,candidateIdSet);
         if(code5 == 1)
         {
             result.put("shangBan", true);
@@ -303,7 +339,8 @@ public class AdminCtrl
             result.put("shangBan", false);
         }
 
-        int code6 = projectAssignmentService.insertAssignments(state, wenTiProjectIdList, wenTiExpertIdSet);
+        int code6 = projectAssignmentService.
+                insertAssignments(state, wenTiProjectIdList, wenTiExpertIdSet);
         if(code6 == 1)
         {
             result.put("wenTi", true);
@@ -354,9 +391,9 @@ public class AdminCtrl
         try
         {
             List<Long> projectIdList = new ArrayList<>();
-            JSONObject paramaters = JsonUtil.getRequestJsonObject(request);
-            int state = paramaters.getIntValue("state");
-            JSONArray json = paramaters.getJSONArray("projectIdList");
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            int state = parameters.getIntValue("state");
+            JSONArray json = parameters.getJSONArray("projectIdList");
 
             for(int i = 0; i < json.size(); i++)
                 projectIdList.add(json.getLong(i));
@@ -401,10 +438,10 @@ public class AdminCtrl
         try
         {
             List<Long> projectIdList = new ArrayList<>();
-            JSONObject paramaters = JsonUtil.getRequestJsonObject(request);
-            int state = paramaters.getIntValue("state");
-            Long projectId = paramaters.getLongValue("projectId");
-            Long expertId = paramaters.getLongValue("expertId");
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            int state = parameters.getIntValue("state");
+            Long projectId = parameters.getLongValue("projectId");
+            Long expertId = parameters.getLongValue("expertId");
 
             int code = projectAssignmentService.deleteAssignment(projectId,expertId,state);
             if(code == 1) //撤回成功
@@ -537,6 +574,7 @@ public class AdminCtrl
     }
     */
 
+    /*
     @RequestMapping(value = "/select", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> select(HttpServletRequest request)
@@ -628,6 +666,305 @@ public class AdminCtrl
             result.put("errMsg", -3);
         }
         return result;
+    }*/
+
+    @RequestMapping(value = "/select", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> select(HttpServletRequest request)
+    {
+        Map<String, Object> result = new HashMap<>();
+        List<Long> projectIdListToNext = new ArrayList<>();
+        List<Long> projectIdListToRemain = new ArrayList<>();
+        try
+        {
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            int state = parameters.getIntValue("state");
+
+
+            JSONArray remainList = parameters.getJSONArray("projectIdListToRemain");
+            for (int i = 0; i < remainList.size(); i++)
+            {
+                projectIdListToRemain.add(remainList.getLong(i));
+            }
+
+            JSONArray nextList = parameters.getJSONArray("projectIdListToNext");
+            for (int i = 0; i < nextList.size(); i++)
+            {
+                projectIdListToNext.add(nextList.getLong(i));
+            }
+
+            if (state == 1)
+            {
+                Map<String, Object>  code= projectService.selectProjectsAtFirstAssessment(projectIdListToNext, projectIdListToRemain);
+                if ((int)code.get("code") == 1)
+                {
+                    result.put("success", 1);
+                    result.put("errMsg", null);
+                }
+                else if ((int)code.get("code") == -4)
+                {
+                    result.put("success", false);
+                    result.put("errMsg", -4);
+                    result.put("errProjectName", code.get("errProjectName"));
+                }
+                else
+                {
+                    result.put("success", false);
+                    result.put("errMsg", -1);
+                }
+            }
+            else if (state == 2)
+            {
+                int code = projectService.selectProjectsAtLastAssessment(projectIdListToNext,projectIdListToRemain);
+                if (code == 1)
+                {
+                    result.put("success", 1);
+                    result.put("errMsg", null);
+                }
+                else if (code == -4)
+                {
+                    result.put("success", false);
+                    result.put("errMsg", -4);
+                }
+                else
+                {
+                    result.put("success", false);
+                    result.put("errMsg", -1);
+                }
+            }
+            else
+            {
+                result.put("success", false);
+                result.put("errMsg", -2);
+                return result;
+            }
+
+        }
+        catch (IOException e)
+        {
+            result.put("success", false);
+            result.put("errMsg", -2);
+        }
+        catch (RuntimeException e)
+        {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("errMsg", -3);
+        }
+        return result;
+    }
+
+    @RequestMapping(value = "/alter_grade_type1", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> alterGradeType1(HttpServletRequest request)
+    {
+        Map<String, Object> result = new HashMap<>();
+        try
+        {
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            Long projectId = parameters.getLongValue("projectId");
+            float effect = parameters.getFloatValue("effect");
+            float operationPerformance = parameters.getFloat("operationPerformance");
+            float art = parameters.getFloatValue("art");
+            float outdoorEnvir = parameters.getFloatValue("outdoorEnvir");
+            float resourceUtilization = parameters.getFloatValue("resourceUtilization");
+            float indoorEnvir = parameters.getFloatValue("indoorEnvir");
+            float constructionManagement = parameters.getFloatValue("constructionManagement");
+            float operationManagement = parameters.getFloatValue("operationManagement");
+            float innovationEvaluation = parameters.getFloatValue("innovationEvaluation");
+            float grade = parameters.getFloatValue("grade");
+
+            EnvirBenefit1 envirBenefit1 = envirBenefit1Mapper.
+                    queryScoreByProjectIdAndState(projectId, 3,-1L);
+            envirBenefit1.setArt(art);
+            envirBenefit1.setOutdoorEnvir(outdoorEnvir);
+            envirBenefit1.setResourceUtilization(resourceUtilization);
+            envirBenefit1.setIndoorEnvir(indoorEnvir);
+            envirBenefit1.setConstructionManagement(constructionManagement);
+            envirBenefit1.setInnovationEvaluation(innovationEvaluation);
+            envirBenefit1.setOperationManagement(operationManagement);
+
+
+            SocialBenefit socialBenefit = socialBenefitMapper
+                    .queryScoreByProjectIdAndState(projectId, 3,-1L);
+            socialBenefit.setEffect(effect);
+
+
+            EconoBenefit econoBenefit = econoBenefitMapper
+                    .queryScoreByProjectIdAndState(projectId, 3,-1L);
+            econoBenefit.setOperationPerformance(operationPerformance);
+            type1Service.alterType1Score(envirBenefit1,socialBenefit,econoBenefit,grade);
+            result.put("success", true);
+            result.put("errMsg", null);
+        }
+        catch (Exception e)
+        {
+            result.put("success",false);
+            result.put("errMsg", -1);
+            return result;
+        }
+        return result;
+    }
+
+    @RequestMapping(value = "/alter_grade_type2", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> alterGradeType2(HttpServletRequest request)
+    {
+        Map<String, Object> result = new HashMap<>();
+        try
+        {
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            Long projectId = parameters.getLongValue("projectId");
+            float effect = parameters.getFloat("effect");
+            float operationPerformance = parameters.getFloat("operationPerformance");
+            float art = parameters.getFloat("art");
+            float landUsing = parameters.getFloat("landUsing");
+            float informationManagement = parameters.getFloat("informationManagement");
+            float envir = parameters.getFloat("envir");
+            float greenTransportation = parameters.getFloat("greenTransportation");
+            float grade = parameters.getFloat("grade");
+
+            EnvirBenefit2 envirBenefit2 = envirBenefit2Mapper.
+                    queryScoreByProjectIdAndState(projectId,3,-1L);
+            envirBenefit2.setArt(art);
+            envirBenefit2.setLandUsing(landUsing);
+            envirBenefit2.setInformationManagement(informationManagement);
+            envirBenefit2.setEnvir(envir);
+            envirBenefit2.setGreenTransportation(greenTransportation);
+
+            SocialBenefit socialBenefit = socialBenefitMapper
+                    .queryScoreByProjectIdAndState(projectId, 3,-1L);
+            socialBenefit.setEffect(effect);
+
+            EconoBenefit econoBenefit = econoBenefitMapper
+                    .queryScoreByProjectIdAndState(projectId, 3,-1L);
+            econoBenefit.setOperationPerformance(operationPerformance);
+            
+            type2Service.alterType2Score(envirBenefit2,socialBenefit,econoBenefit,grade);
+            result.put("success", true);
+            result.put("errMsg", null);
+        }
+        catch (Exception e)
+        {
+            result.put("success",false);
+            result.put("errMsg", -1);
+            return result;
+        }
+        return result;
+    }
+
+    @RequestMapping(value = "/alter_grade_type3", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> alterGradeType3(HttpServletRequest request)
+    {
+        Map<String, Object> result = new HashMap<>();
+        try
+        {
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            Long projectId = parameters.getLongValue("projectId");
+            float  effect = parameters.getFloat("effect");
+            float  operationPerformance = parameters.getFloat("operationPerformance");
+            float  art = parameters.getFloat("art");
+            float  envirFriendliness = parameters.getFloat("envirFriendliness");
+            float  projectFunction = parameters.getFloat("projectFunction");
+            float  projectTechnology = parameters.getFloat("projectTechnology");
+            float grade = parameters.getFloat("grade");
+
+            EnvirBenefit3 envirBenefit3 = envirBenefit3Mapper.
+                    queryScoreByProjectIdAndState(projectId, 3,-1L);
+            envirBenefit3.setArt(art);
+            envirBenefit3.setEnvirFriendliness(envirFriendliness);
+            envirBenefit3.setProjectFunction(projectFunction);
+            envirBenefit3.setProjectTechnology(projectTechnology);
+
+            SocialBenefit socialBenefit = socialBenefitMapper
+                    .queryScoreByProjectIdAndState(projectId, 3,-1L);
+            socialBenefit.setEffect(effect);
+
+            EconoBenefit econoBenefit = econoBenefitMapper
+                    .queryScoreByProjectIdAndState(projectId, 3,-1L);
+            econoBenefit.setOperationPerformance(operationPerformance);
+
+            type3Service.alterType3Score(envirBenefit3,socialBenefit,econoBenefit,grade);
+            result.put("success", true);
+            result.put("errMsg", null);
+        }
+        catch (Exception e)
+        {
+            result.put("success",false);
+            result.put("errMsg", -1);
+            return result;
+        }
+        return result;
+    }
+
+    @RequestMapping(value = "/alter_grade_type4", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> alterGradeType4(HttpServletRequest request)
+    {
+        Map<String, Object> result = new HashMap<>();
+        try
+        {
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            Long projectId = parameters.getLongValue("projectId");
+            float  effect = parameters.getFloat("effect");
+            float  operationPerformance = parameters.getFloat("operationPerformance");
+            float  culturalEnvir = parameters.getFloat("culturalEnvir");
+            float  decorationMaterial = parameters.getFloat("decorationMaterial");
+            float  decorationTechnology = parameters.getFloat("decorationTechnology");
+            float  physicalEnvir = parameters.getFloat("physicalEnvir");
+            float grade = parameters.getFloat("grade");
+
+            EnvirBenefit4 envirBenefit4= envirBenefit4Mapper.
+                    queryScoreByProjectIdAndState(projectId, 3,-1L);
+            envirBenefit4.setCulturalEnvir(culturalEnvir);
+            envirBenefit4.setDecorationMaterial(decorationMaterial);
+            envirBenefit4.setDecorationTechnology(decorationTechnology);
+            envirBenefit4.setPhysicalEnvir(physicalEnvir);
+
+            SocialBenefit socialBenefit = socialBenefitMapper
+                    .queryScoreByProjectIdAndState(projectId, 3,-1L);
+            socialBenefit.setEffect(effect);
+
+            EconoBenefit econoBenefit = econoBenefitMapper
+                    .queryScoreByProjectIdAndState(projectId, 3,-1L);
+            econoBenefit.setOperationPerformance(operationPerformance);
+
+            type4Service.alterType4Score(envirBenefit4,socialBenefit,econoBenefit,grade);
+            result.put("success", true);
+            result.put("errMsg", null);
+        }
+        catch (Exception e)
+        {
+            result.put("success",false);
+            result.put("errMsg", -1);
+            return result;
+        }
+        return result;
+    }
+
+    @RequestMapping(value = "/award", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> award(HttpServletRequest request)
+    {
+        Map<String, Object> result = new HashMap<>();
+        try
+        {
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            Long projectId = parameters.getLongValue("projectId");
+            int prize = parameters.getIntValue("prize");
+            Project project = projectService.queryProjectById(projectId);
+            project.setPrizeClass(prize);
+            projectService.updateProject(project);
+            result.put("success", true);
+            result.put("errMsg", null);
+        }
+        catch (Exception e)
+        {
+            result.put("success",false);
+            result.put("errMsg", -1);
+        }
+        return result;
     }
 
     @RequestMapping(value = "/get_all_experts", method = RequestMethod.GET)
@@ -677,5 +1014,238 @@ public class AdminCtrl
         return result;
     }
 
+    @RequestMapping(value = "/get_project_assessment_state/{state}/{projectId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> getProjectAssessmentState(@PathVariable(value = "state") int state,
+                                                         @PathVariable(value = "projectId") Long projectId)
+    {
+        Map<String, Object> result = new HashMap<>();
+        try
+        {
+            List<ProjectAssignment> projectAssignments = projectAssignmentMapper.
+                    queryAssignmentsByProjectIdAndState(projectId,state);
+            List<String> expertNameList = new ArrayList<>();
+            for(ProjectAssignment projectAssignment: projectAssignments)
+            {
+                if(projectAssignment.getFinish() == 0)
+                {
+                    Expert expert = expertService.queryExpertById(projectAssignment.getExpertId());
+                    expertNameList.add(expert.getName());
+                }
+            }
+            result.put("expertNameList", expertNameList);
+            result.put("success",1);
+            result.put("errMsg", null);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            result.put("success",false);
+            result.put("errMsg", -1);
+        }
+        return result;
+    }
+    @RequestMapping(value = "/get_project_avg_grade/{type}/{projectId}/{state}", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> queryAvgScoreByTypeAndProjectIdAndState(@PathVariable("type") int type,
+                                                                       @PathVariable("projectId") Long projectId,
+                                                                       @PathVariable("state") int state)
+    {
+        Map<String, Object> result = new HashMap<>();
+        switch (type)
+        {
+            case 1:
+                try
+                {
+                    Map<String, Float> avgScore1 = type1Service.queryScoresByProjectIdAndState(projectId, state);
+                    Project project1 = projectService.queryProjectById(projectId);
+                    if (avgScore1 != null)
+                    {
 
+                        result.put("success", 1);
+                        result.put("errMsg", null);
+                        result.put("avgOperationPerformance", avgScore1.get("avgOperationPerformance"));
+                        result.put("avgEffect", avgScore1.get("avgEffect"));
+                        result.put("avgArt", avgScore1.get("avgArt"));
+                        result.put("avgIndoorEnvir", avgScore1.get("avgIndoorEnvir"));
+                        result.put("avgConstructionManagement", avgScore1.get("avgConstructionManagement"));
+                        result.put("avgInnovationEvaluation", avgScore1.get("avgInnovationEvaluation"));
+                        result.put("avgOperationManagement", avgScore1.get("avgOperationManagement"));
+                        result.put("avgOutdoorEnvir", avgScore1.get("avgOutdoorEnvir"));
+                        result.put("avgResourceUtilization", avgScore1.get("avgResourceUtilization"));
+                        if (state == 1)
+                            result.put("grade", project1.getfGrade());
+                        else if(state == 2)
+                            result.put("grade", project1.getlGrade());
+                        else
+                            result.put("grade", project1.getFinalGrade());
+                    }
+                    else
+                    {
+                        result.put("success", 0);
+                        result.put("errMsg", "-1");
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    result.put("success", 0);
+                    result.put("errMsg", "1");
+                }
+                break;
+            case 2:
+                try
+                {
+                    Map<String, Float> avgScore2 = type2Service.queryScoresByProjectIdAndState(projectId,state);
+                    Project project2 = projectService.queryProjectById(projectId);
+                    if(avgScore2!= null)
+                    {
+
+                        result.put("success",1);
+                        result.put("errMsg",null);
+                        result.put("avgOperationPerformance", avgScore2.get("avgOperationPerformance"));
+                        result.put("avgEffect", avgScore2.get("avgEffect"));
+                        result.put("avgArt", avgScore2.get("avgArt"));
+                        result.put("avgInformationManagement", avgScore2.get("avgInformationManagement"));
+                        result.put("avgGreenTransportation", avgScore2.get("avgGreenTransportation"));
+                        result.put("avgEnvir", avgScore2.get("avgEnvir"));
+                        result.put("avgLandUsing", avgScore2.get("avgLandUsing"));
+                        if(state == 1)
+                            result.put("grade", project2.getfGrade());
+                        else if(state == 2)
+                            result.put("grade", project2.getlGrade());
+                        else
+                            result.put("grade", project2.getFinalGrade());
+                    }
+                    else
+                    {
+                        result.put("success",0);
+                        result.put("errMsg", "-1");
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    result.put("success", 0);
+                    result.put("errMsg", "1");
+                }
+                break;
+            case 3:
+                try
+                {
+                    Map<String, Float> avgScore3 = type3Service.queryScoresByProjectIdAndState(projectId,state);
+                    Project project3 = projectService.queryProjectById(projectId);
+                    if(avgScore3 != null)
+                    {
+
+                        result.put("success",1);
+                        result.put("errMsg",null);
+                        result.put("avgOperationPerformance", avgScore3.get("avgOperationPerformance"));
+                        result.put("avgEffect", avgScore3.get("avgEffect"));
+                        result.put("avgArt", avgScore3.get("avgArt"));
+                        result.put("avgEnvirFriendliness", avgScore3.get("avgEnvirFriendliness"));
+                        result.put("avgProjectFunction", avgScore3.get("avgProjectFunction"));
+                        result.put("avgProjectTechnology", avgScore3.get("avgProjectTechnology"));
+                        if(state == 1)
+                            result.put("grade", project3.getfGrade());
+                        else if(state == 2)
+                            result.put("grade", project3.getlGrade());
+                        else
+                            result.put("grade", project3.getFinalGrade());
+                    }
+                    else
+                    {
+                        result.put("success",0);
+                        result.put("errMsg", "-1");
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    result.put("success", 0);
+                    result.put("errMsg", "1");
+                }
+                break;
+            case 4:
+                try
+                {
+                    Map<String, Float> avgScore4 = type4Service.queryScoresByProjectIdAndState(projectId,state);
+                    Project project4 = projectService.queryProjectById(projectId);
+                    if(avgScore4 != null)
+                    {
+
+                        result.put("success",1);
+                        result.put("errMsg",null);
+                        result.put("avgOperationPerformance", avgScore4.get("avgOperationPerformance"));
+                        result.put("avgEffect", avgScore4.get("avgEffect"));
+                        result.put("avgCulturalEnvir", avgScore4.get("avgCulturalEnvir"));
+                        result.put("avgPhysicalEnvir", avgScore4.get("avgPhysicalEnvir"));
+                        result.put("avgDecorationMaterial", avgScore4.get("avgDecorationMaterial"));
+                        result.put("avgDecorationTechnology", avgScore4.get("avgDecorationTechnology"));
+                        if(state == 1)
+                            result.put("grade", project4.getfGrade());
+                        else if(state == 2)
+                            result.put("grade", project4.getlGrade());
+                        else
+                            result.put("grade", project4.getFinalGrade());
+                    }
+                    else
+                    {
+                        result.put("success",0);
+                        result.put("errMsg", "-1");
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    result.put("success", 0);
+                    result.put("errMsg", "1");
+                }
+
+                break;
+        }
+        return result;
+    }
+
+    @RequestMapping(value = "/get_not_beginning_experts/{state}", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> getNotBeginningExperts(@PathVariable("state") int state)
+    {
+        Map<String, Object> result = new HashMap<>();
+
+        try
+        {
+            List<String> experts = projectAssignmentService.queryFinshByProjectIdAndState(state);
+            result.put("success", 1);
+            result.put("errMsg", null);
+            result.put("experts", experts);
+        }
+        catch(Exception e)
+        {
+            result.put("success", false);
+            result.put("errMsg", -1);
+        }
+        return result;
+    }
+
+    @RequestMapping(value = "/get_completion_status/{state}", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> getCompletionStatus(@PathVariable("state") int state)
+    {
+        Map<String, Object> result = new HashMap<>();
+
+        try
+        {
+            List<String> status = projectAssignmentService.queryCompletionStatus(state);
+            result.put("success", 1);
+            result.put("errMsg", null);
+            result.put("status", status);
+        }
+        catch(Exception e)
+        {
+            result.put("success", false);
+            result.put("errMsg", -1);
+        }
+        return result;
+    }
 }

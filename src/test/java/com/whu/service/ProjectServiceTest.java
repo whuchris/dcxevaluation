@@ -47,6 +47,13 @@ public class ProjectServiceTest extends FcxevaluationApplicationTests
     }
 
     @Test
+    public void queryProjectsByState()
+    {
+        List<Project> projects = projectService.queryProjectsByState(1);
+        log.info("ProjectServiceTest.queryProjectsByState: " + projects);
+    }
+
+    @Test
     public void queryUnassignedProjectsF()
     {
         List<Project> projects = projectService.queryUnassignedProjectsF();

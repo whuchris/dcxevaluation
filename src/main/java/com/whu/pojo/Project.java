@@ -14,6 +14,18 @@ public class Project
     private String name;
     private float fGrade = -1.0f;
     private float lGrade = -1.0f;
+    private float finalGrade = -1.0f;
+
+    public float getFinalGrade()
+    {
+        return finalGrade;
+    }
+
+    public void setFinalGrade(float finalGrade)
+    {
+        this.finalGrade = finalGrade;
+    }
+
     private List<String> fExpertName;
     private List<String> lExpertName;
     private int finish;
@@ -65,6 +77,7 @@ public class Project
                 ", name='" + name + '\'' +
                 ", fGrade=" + fGrade +
                 ", lGrade=" + lGrade +
+                ", finalGrade=" + finalGrade +
                 ", fExpertName='" + fExpertName + '\'' +
                 ", lExpertName='" + lExpertName + '\'' +
                 ", finish='" + finish + '\'' +
@@ -150,26 +163,13 @@ public class Project
     {
         switch (state)
         {
-            case 0:
-                return "待初评";
+
             case 1:
-                return "初评中";
+                return "初评";
             case 2:
-                return "初评完成";
-            case 20:
-                return "待会评";
-            case 21:
-                return "会评中";
-            case 22:
-                return "会评完成";
-            case 23:
-                return "会评晋级";
-            case 24:
-                return "会评淘汰";
+                return "会评";
             case 3:
-                return "初评晋级";
-            case 4:
-                return "初评淘汰";
+                return "终评";
              default:
                 return "待初评";
         }
@@ -180,13 +180,13 @@ public class Project
         switch (prizeClass)
         {
             case 1:
-                return "一等奖";
+                return "金奖";
             case 2:
-                return "二等奖";
+                return "一等奖";
             case 3:
-                return "三等奖";
+                return "二等奖";
             case 4:
-                return "优秀奖";
+                return "三等奖";
              default:
                 return "待定";
         }

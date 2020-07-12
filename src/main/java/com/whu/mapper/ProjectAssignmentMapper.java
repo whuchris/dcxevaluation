@@ -9,6 +9,7 @@ import java.util.List;
 @Mapper
 public interface ProjectAssignmentMapper
 {
+    @Options(useGeneratedKeys = true, keyProperty = "id")
     /**
      * 返回评审该项目的专家id
      * @param projectId 当前的项目id
@@ -29,6 +30,11 @@ public interface ProjectAssignmentMapper
     @Select("SELECT project_id FROM t_project_assignment " +
             "WHERE expert_id =#{expertId} AND state = #{state}")
     List<Long> queryProjectIdsByExpertIdAndState(@Param(value = "expertId")Long expertId,
+                                                 @Param(value = "state")int state);
+
+    @Select("SELECT finish FROM t_project_assignment " +
+            "WHERE expert_id =#{expertId} AND state = #{state}")
+    List<Integer> queryFinishByExpertIdAndState(@Param(value = "expertId")Long expertId,
                                                  @Param(value = "state")int state);
 
     @Select("SELECT project_id FROM t_project_assignment " +
@@ -151,8 +157,21 @@ public interface ProjectAssignmentMapper
      */
     @Select("SELECT * FROM t_project_assignment WHERE " +
             "project_id = #{projectId} AND " +
-            "state = #{state}")
+            "state = #{state} ")
     List<ProjectAssignment> queryAssignmentsByProjectIdAndState(@Param(value = "projectId") Long projectId,
+                                                                @Param(value = "state") int state);
+
+    /**
+     * 根据项目id，状态返回项目所有评分情况，并按照分数大小排序
+     * @param projectId 项目id
+     * @param state 初评或者会评
+     * @return 返回分配的详细信息
+     */
+    @Select("SELECT * FROM t_project_assignment WHERE " +
+            "project_id = #{projectId} AND " +
+            "state = #{state} " +
+            "ORDER BY grade")
+    List<ProjectAssignment> queryAssignmentsByProjectIdAndStateOrderByGrade(@Param(value = "projectId") Long projectId,
                                                                 @Param(value = "state") int state);
 
     @Select("SELECT finish FROM t_project_assignment WHERE " +
@@ -162,4 +181,14 @@ public interface ProjectAssignmentMapper
     int queryFinishByProjectIdAndExpertIdAndState(@Param(value = "projectId") Long projectId,
                                                   @Param(value = "expertId") Long expertId,
                                                   @Param(value = "state") int state);
+
+
+    /**
+     * 插入一条记录，用于终评
+     * @param projectAssignment 插入的终评记录
+     * @return
+     */
+    @Insert("INSERT INTO t_project_assignment (project_id, expert_id, state, finish, grade) " +
+        "VALUES(#{projectId}, #{expertId}, #{state}, #{finish}, #{grade})")
+    int insertProjectAssignment(ProjectAssignment projectAssignment);
 }

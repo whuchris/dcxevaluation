@@ -10,6 +10,7 @@ public interface ExpertService
      * 根据id查找对应的评审专家
      * @param id 专家的id
      * @return 返回查询结果
+     * @Use AdminCtrl.getProjectAssessmentState 返回当前项目没有评审的专家的名字
      */
     Expert queryExpertById(Long id);
 

@@ -99,15 +99,17 @@ public class Type4ServiceImpl implements Type4Service
                     total += gradeList.get(i);
                 }
                 if(state == 1)
-                    if(gradeNum > 2)
+                    /*if(gradeNum > 2)
                         project.setfGrade((total-gradeList.get(0)-gradeList.get(gradeNum-1)) / (gradeNum - 2 ));
                     else
-                        project.setfGrade(total / (gradeNum));
+                        project.setfGrade(total / (gradeNum));*/ //去掉最高分最低分的版本
+                    project.setfGrade(total / (gradeNum)); //不去掉最高分最低分的版本
                 else
-                    if(gradeNum > 2)
+                    /*if(gradeNum > 2)
                         project.setlGrade((total-gradeList.get(0)-gradeList.get(gradeNum-1)) / (gradeNum - 2 ));
                     else
-                        project.setlGrade(total / (gradeNum));
+                        project.setlGrade(total / (gradeNum));*/ //去掉最高分最低分的版本
+                    project.setlGrade(total / (gradeNum)); //不去掉最高分最低分的版本
                 projectMapper.updateProject(project);
             }
             return 1;
@@ -148,6 +150,13 @@ public class Type4ServiceImpl implements Type4Service
         Map<String, Float> result = new HashMap<>();
         try
         {
+            List<ProjectAssignment> projectAssignments = projectAssignmentMapper.
+                    queryAssignmentsByProjectIdAndStateOrderByGrade(projectId,state);
+
+            //Long maxGradeExpertId = projectAssignments.get(projectAssignments.size() - 1).getExpertId();
+            //Long minGradeExpertId = projectAssignments.get(0).getExpertId();去掉最高分最低分的版本
+
+
             List<EconoBenefit> econoBenefits = econoBenefitMapper.queryScoresByProjectIdAndState(projectId, state);
             List<SocialBenefit> socialBenefits = socialBenefitMapper.queryScoresByProjectIdAndState(projectId, state);
             List<EnvirBenefit4> envirBenefit4s = envirBenefit4Mapper.queryScoresByProjectIdAndState(projectId, state);
@@ -160,24 +169,61 @@ public class Type4ServiceImpl implements Type4Service
             float totalDecorationTechnology = 0.0f;
             for(int i = 0; i < size; ++i)
             {
-                totalOperationPerformance += econoBenefits.get(i).getOperationPerformance();
-                totalEffect += socialBenefits.get(i).getEffect();
-                totalCulturalEnvir += envirBenefit4s.get(i).getCulturalEnvir();
-                totalPhysicalEnvir += envirBenefit4s.get(i).getPhysicalEnvir();
-                totalDecorationMaterial += envirBenefit4s.get(i).getDecorationMaterial();
-                totalDecorationTechnology += envirBenefit4s.get(i).getDecorationTechnology();
+                EnvirBenefit4 envirBenefit4 = envirBenefit4s.get(i);
+                EconoBenefit econoBenefit = econoBenefits.get(i);
+                /*
+                if(size > 2 &&
+                        ((econoBenefit.getExpertId().equals(maxGradeExpertId))
+                                || (econoBenefit.getExpertId().equals(minGradeExpertId))))
+                    continue;*/ //去掉最高分最低分
+                SocialBenefit socialBenefit = socialBenefits.get(i);
+
+                totalOperationPerformance += econoBenefit.getOperationPerformance();
+                totalEffect += socialBenefit.getEffect();
+                totalCulturalEnvir += envirBenefit4.getCulturalEnvir();
+                totalPhysicalEnvir += envirBenefit4.getPhysicalEnvir();
+                totalDecorationMaterial += envirBenefit4.getDecorationMaterial();
+                totalDecorationTechnology += envirBenefit4.getDecorationTechnology();
             }
-            result.put("avgOperationPerformance", totalOperationPerformance / size);
-            result.put("avgEffect", totalEffect / size);
-            result.put("avgCulturalEnvir", totalCulturalEnvir / size);
-            result.put("avgPhysicalEnvir", totalPhysicalEnvir / size);
-            result.put("avgDecorationMaterial", totalDecorationMaterial / size);
-            result.put("avgDecorationTechnology", totalDecorationTechnology / size);
+            //size = size > 2? (size-2): size; 用于去掉最高分最低分的
+            result.put("avgOperationPerformance", (float)(Math.round(totalOperationPerformance / size*100))/100);
+            result.put("avgEffect", (float)(Math.round(totalEffect / size*100))/100);
+            result.put("avgCulturalEnvir", (float)(Math.round(totalCulturalEnvir / size*100))/100);
+            result.put("avgPhysicalEnvir", (float)(Math.round(totalPhysicalEnvir / size*100))/100);
+            result.put("avgDecorationMaterial", (float)(Math.round(totalDecorationMaterial / size*100))/100);
+            result.put("avgDecorationTechnology", (float)(Math.round(totalDecorationTechnology / size*100))/100);
         }
         catch (Exception e)
         {
             return null;
         }
         return result;
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = Exception.class)
+    @Override
+    public int alterType4Score(EnvirBenefit4 envirBenefit4, SocialBenefit socialBenefit, EconoBenefit econoBenefit,
+                               float grade)
+    {
+        try
+        {
+            envirBenefit4Mapper.updateScore(envirBenefit4);
+            socialBenefitMapper.updateScore(socialBenefit);
+            econoBenefitMapper.updateScore(econoBenefit);
+            Long projectId = econoBenefit.getProjectId();
+            ProjectAssignment projectAssignment = projectAssignmentMapper.
+                    queryAssignmentByProjectIdAndExpertIdAndState(projectId,-1L,3);
+            projectAssignment.setGrade(grade);
+            projectAssignmentMapper.updateAssignment(projectAssignment);
+            Project project = projectMapper.queryProjectById(projectId);
+            project.setFinalGrade(grade);
+            projectMapper.updateProject(project);
+        }
+        catch (Exception e)
+        {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return -1;
+        }
+        return 1;
     }
 }

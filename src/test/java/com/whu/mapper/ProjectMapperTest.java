@@ -6,8 +6,10 @@ import com.whu.pojo.Project;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.io.File;
 import java.sql.Date;
@@ -59,6 +61,13 @@ public class ProjectMapperTest extends FcxevaluationApplicationTests
     }
 
     @Test
+    public void queryProjectsByState()
+    {
+        List<Project> projects = projectMapper.queryProjectsByState(1);
+        log.info("ProjectMapperTest.queryProjectsByState: " + projects);
+    }
+
+    @Test
     public void queryUnassignedProjectsF()
     {
         List<Project> projects = projectMapper.queryUnassignedProjectsF();
@@ -75,7 +84,7 @@ public class ProjectMapperTest extends FcxevaluationApplicationTests
     @Test
     public void fileTest()
     {
-        File xml = new File("D:\\Programming\\IDEA\\fcxevaluation\\src\\test\\java\\com\\whu\\mapper\\test.xlsx");
+        File xml = new File("D:\\Programming\\IDEA\\fcxevaluation\\src\\test\\java\\com\\whu\\mapper\\final_project.xlsx");
         if(!xml.exists())
             log.info("ProjectMapperTest.fileTest: " + "file not exists");
         else
@@ -157,10 +166,9 @@ public class ProjectMapperTest extends FcxevaluationApplicationTests
                     project.setName(name.toString());
                     Date date = new Date(DateUtil.getJavaDate(Double.valueOf(time.toString())).getTime());
                     project.setApplicationTime(date);
-                    project.setAssessmentState(0);
+                    project.setAssessmentState(1);
                     project.setPrizeClass(5);
                     projectMapper.insertProject(project,prizeId);
-                    //System.out.println(project);
                 }
             }
             catch (Exception e)

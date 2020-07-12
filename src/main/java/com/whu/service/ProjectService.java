@@ -4,6 +4,7 @@ import com.whu.pojo.Project;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ProjectService
 {
@@ -53,7 +54,7 @@ public interface ProjectService
      * @param projectIdListToNext  初评中进入会评的
      * @return
      */
-    int selectProjectsAtFirstAssessment(List<Long> projectIdListToNext, List<Long> projectIdListToRemain);
+    Map<String,Object> selectProjectsAtFirstAssessment(List<Long> projectIdListToNext, List<Long> projectIdListToRemain);
 
     /**
      * 从会评结果中选出来直接晋级项目
@@ -61,4 +62,11 @@ public interface ProjectService
      * @return
      */
     int selectProjectsAtLastAssessment(List<Long> projectIdListToPromotion, List<Long> projectIdListToRemain);
+
+    /**
+     * 根据初评会评状态查询所有的项目
+     * @param state 初评或者会评状态
+     * @return 项目列表
+     */
+    List<Project> queryProjectsByState(int state);
 }

@@ -29,6 +29,7 @@ public interface ProjectMapper
             "application_time = #{applicationTime}, " +
             "f_grade = #{fGrade}, " +
             "l_grade = #{lGrade}, " +
+            "final_grade = #{finalGrade}, " +
             "assessment_state = #{assessmentState} WHERE id = #{id}")
     int updateProject(Project project);
 
@@ -78,6 +79,26 @@ public interface ProjectMapper
     @Select("SELECT * FROM t_project")
     List<Project> queryAllProjects();
 
+    /**
+     * 查找表中所有的初评/会评项目
+     * @param state 初评或者会评
+     * @return 返回的项目列表
+     */
+    @Results({
+            @Result(column = "prize_id", property = "prize",
+                    one = @One(select = "com.whu.mapper.PrizeMapper.queryPrizeById")),
+            @Result(column = "id", property = "fExpertName",
+                    one = @One(select = "com.whu.mapper.ProjectAssignmentMapper.queryfExpertNameByProjectId")),
+            @Result(column = "id", property = "lExpertName",
+                    one = @One(select = "com.whu.mapper.ProjectAssignmentMapper.querylExpertNameByProjectId")),
+            @Result(column = "id", property = "id")
+    })
+    @Select("SELECT * FROM t_project WHERE assessment_state = #{state}")
+    List<Project> queryProjectsByState(int state);
+
+
+    @Select("SELECT * FROM t_project WHERE assessment_state = #{state}")
+    List<Project> queryProjectsByStateWithOutInfo(int state);
 
     /**
      * 查找初评未被分配项目
@@ -104,7 +125,7 @@ public interface ProjectMapper
      */
     @Insert("INSERT INTO t_project VALUES(#{project.id}, #{prize_id}, " +
             "#{project.assessmentState}, #{project.prizeClass}, #{project.applicationTime}, #{project.name}," +
-            "#{project.fGrade}, #{project.lGrade})")
+            "#{project.fGrade}, #{project.lGrade}, #{project.finalGrade})")
     int insertProject(@Param(value = "project") Project project, @Param(value = "prize_id") Long prizeId);
 
 }

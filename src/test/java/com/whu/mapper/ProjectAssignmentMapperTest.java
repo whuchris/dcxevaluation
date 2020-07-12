@@ -1,6 +1,7 @@
 package com.whu.mapper;
 
 import com.whu.FcxevaluationApplicationTests;
+import com.whu.pojo.Expert;
 import com.whu.pojo.ProjectAssignment;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ public class ProjectAssignmentMapperTest extends FcxevaluationApplicationTests
     @Autowired
     ProjectAssignmentMapper projectAssignmentMapper;
 
+    @Autowired
+    ExpertMapper expertMapper;
+
     @Test
     public void queryExpertIdByProjectIdAndState()
     {
@@ -22,10 +26,50 @@ public class ProjectAssignmentMapperTest extends FcxevaluationApplicationTests
     }
 
     @Test
+    public void queryFinshByProjectIdAndState()
+    {
+        List<String> names = new ArrayList<>();
+        for(Long expertId = 1L; expertId <= 62L; expertId++)
+        {
+            boolean start = false;
+            List<Integer> projectIdList = projectAssignmentMapper.queryFinishByExpertIdAndState(expertId, 1);
+            for(int i : projectIdList)
+            {
+                if(i == 1)
+                {
+                    start = true;
+                    break;
+                }
+
+            }
+            if(!start)
+            {
+                Expert expert = expertMapper.queryExpertById(expertId);
+                names.add(expert.getName());
+            }
+        }
+        for(int i = 1; i <= names.size(); i++)
+        {
+            if(i % 7 == 0)
+                System.out.println();
+            System.out.print(names.get(i - 1) + " ");
+        }
+        System.out.println();
+    }
+
+    @Test
     public void queryProjectIdsByExpertIdAndState()
     {
         List<Long> projectIdList = projectAssignmentMapper.queryProjectIdsByExpertIdAndState(1L,1);
         log.info("ProjectAssignmentMapperTest.queryProjectIdsByExpertIdAndState: " + projectIdList);
+    }
+
+    @Test
+    public void queryProjectAssigmentsByProjectIdIdAndState()
+    {
+        List<ProjectAssignment> projectAssignments =
+                projectAssignmentMapper.queryAssignmentsByProjectIdAndState(56L,1);
+        log.info("ProjectAssignmentMapperTest.queryProjectIdsByExpertIdAndState: " + projectAssignments);
     }
 
     @Test

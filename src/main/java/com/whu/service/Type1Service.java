@@ -21,6 +21,17 @@ public interface Type1Service
     int insertType1Score(EnvirBenefit1 envirBenefit1, SocialBenefit socialBenefit, EconoBenefit econoBenefit,
                          float grade);
 
+    /**
+     * 改变建筑类分数，只适用于终评
+     * @param envirBenefit1
+     * @param socialBenefit
+     * @param econoBenefit
+     * @param grade
+     * @return
+     */
+    int alterType1Score(EnvirBenefit1 envirBenefit1, SocialBenefit socialBenefit, EconoBenefit econoBenefit,
+                        float grade);
+
     Map<String, Benefit> queryScoreByProjectIdAndState(Long projectId, int state, Long expertId);
 
     Map<String, Float> queryScoresByProjectIdAndState(Long projectId, int state);

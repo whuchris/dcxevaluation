@@ -52,9 +52,9 @@ public class ExpertCtrl
         Expert expert;
         try
         {
-            JSONObject paramaters = JsonUtil.getRequestJsonObject(request);
-            String username = paramaters.getString("username");
-            String password = paramaters.getString("password");
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            String username = parameters.getString("username");
+            String password = parameters.getString("password");
 
             expert = expertService.queryExpertByUsername(username);
 
@@ -95,10 +95,10 @@ public class ExpertCtrl
         Expert expert;
         try
         {
-            JSONObject paramaters = JsonUtil.getRequestJsonObject(request);
-            Long id = paramaters.getLong("id");
-            String newPassword =  paramaters.getString("newPassword");
-            String password = paramaters.getString("password");
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            Long id = parameters.getLong("id");
+            String newPassword =  parameters.getString("newPassword");
+            String password = parameters.getString("password");
 
             expert = expertService.queryExpertById(id);
 
@@ -140,10 +140,10 @@ public class ExpertCtrl
         try
         {
             List<Project> projects = projectService.queryProjectsByExpertIdAndState(id, state);
-        result.put("success", 1);
-        result.put("errMsg", "");
-        result.put("projects", projects);
-    }
+            result.put("success", 1);
+            result.put("errMsg", "");
+            result.put("projects", projects);
+        }
         catch (Exception e)
         {
             e.printStackTrace();
@@ -187,20 +187,20 @@ public class ExpertCtrl
         Map<String, Object> result = new HashMap<>();
         try
         {
-            JSONObject paramaters = JsonUtil.getRequestJsonObject(request);
-            Long projectId = paramaters.getLong("projectId");
-            Long expertId = paramaters.getLong("expertId");
-            int state = paramaters.getIntValue("state");
-            float effect = paramaters.getFloatValue("effect");
-            float operationPerformance = paramaters.getFloat("operationPerformance");
-            float art = paramaters.getFloatValue("art");
-            float outdoorEnvir = paramaters.getFloatValue("outdoorEnvir");
-            float resourceUtilization = paramaters.getFloatValue("resourceUtilization");
-            float indoorEnvir = paramaters.getFloatValue("indoorEnvir");
-            float constructionManagement = paramaters.getFloatValue("constructionManagement");
-            float operationManagement = paramaters.getFloatValue("operationManagement");
-            float innovationEvaluation = paramaters.getFloatValue("innovationEvaluation");
-            float grade = paramaters.getFloatValue("grade");
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            Long projectId = parameters.getLong("projectId");
+            Long expertId = parameters.getLong("expertId");
+            int state = parameters.getIntValue("state");
+            float effect = parameters.getFloatValue("effect");
+            float operationPerformance = parameters.getFloat("operationPerformance");
+            float art = parameters.getFloatValue("art");
+            float outdoorEnvir = parameters.getFloatValue("outdoorEnvir");
+            float resourceUtilization = parameters.getFloatValue("resourceUtilization");
+            float indoorEnvir = parameters.getFloatValue("indoorEnvir");
+            float constructionManagement = parameters.getFloatValue("constructionManagement");
+            float operationManagement = parameters.getFloatValue("operationManagement");
+            float innovationEvaluation = parameters.getFloatValue("innovationEvaluation");
+            float grade = parameters.getFloatValue("grade");
 
             EnvirBenefit1 envirBenefit1 = new EnvirBenefit1();
             envirBenefit1.setExpertId(expertId);
@@ -263,18 +263,18 @@ public class ExpertCtrl
         Map<String, Object> result = new HashMap<>();
         try
         {
-            JSONObject paramaters = JsonUtil.getRequestJsonObject(request);
-            Long projectId = paramaters.getLong("projectId");
-            Long expertId = paramaters.getLong( "expertId");
-            int state = paramaters.getIntValue("state");
-            float effect = paramaters.getFloat("effect");
-            float operationPerformance = paramaters.getFloat("operationPerformance");
-            float art = paramaters.getFloat("art");
-            float landUsing = paramaters.getFloat("landUsing");
-            float informationManagement = paramaters.getFloat("informationManagement");
-            float envir = paramaters.getFloat("envir");
-            float greenTransportation = paramaters.getFloat("greenTransportation");
-            float grade = paramaters.getFloat("grade");
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            Long projectId = parameters.getLong("projectId");
+            Long expertId = parameters.getLong( "expertId");
+            int state = parameters.getIntValue("state");
+            float effect = parameters.getFloat("effect");
+            float operationPerformance = parameters.getFloat("operationPerformance");
+            float art = parameters.getFloat("art");
+            float landUsing = parameters.getFloat("landUsing");
+            float informationManagement = parameters.getFloat("informationManagement");
+            float envir = parameters.getFloat("envir");
+            float greenTransportation = parameters.getFloat("greenTransportation");
+            float grade = parameters.getFloat("grade");
 
             EnvirBenefit2 envirBenefit2 = new EnvirBenefit2();
             envirBenefit2.setExpertId(expertId);
@@ -336,17 +336,17 @@ public class ExpertCtrl
         Map<String, Object> result = new HashMap<>();
         try
         {
-            JSONObject paramaters = JsonUtil.getRequestJsonObject(request);
-            Long projectId = paramaters.getLong("projectId");
-            Long expertId = paramaters.getLong("expertId");
-            int state = paramaters.getIntValue("state");
-            float  effect = paramaters.getFloat("effect");
-            float  operationPerformance = paramaters.getFloat("operationPerformance");
-            float  art = paramaters.getFloat("art");
-            float  envirFriendliness = paramaters.getFloat("envirFriendliness");
-            float  projectFunction = paramaters.getFloat("projectFunction");
-            float  projectTechnology = paramaters.getFloat("projectTechnology");
-            float grade = paramaters.getFloat("grade");
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            Long projectId = parameters.getLong("projectId");
+            Long expertId = parameters.getLong("expertId");
+            int state = parameters.getIntValue("state");
+            float  effect = parameters.getFloat("effect");
+            float  operationPerformance = parameters.getFloat("operationPerformance");
+            float  art = parameters.getFloat("art");
+            float  envirFriendliness = parameters.getFloat("envirFriendliness");
+            float  projectFunction = parameters.getFloat("projectFunction");
+            float  projectTechnology = parameters.getFloat("projectTechnology");
+            float grade = parameters.getFloat("grade");
 
 
             EnvirBenefit3 envirBenefit3 = new EnvirBenefit3();
@@ -408,17 +408,17 @@ public class ExpertCtrl
         Map<String, Object> result = new HashMap<>();
         try
         {
-            JSONObject paramaters = JsonUtil.getRequestJsonObject(request);
-            Long projectId = paramaters.getLong("projectId");
-            Long expertId = paramaters.getLong("expertId");
-            int state = paramaters.getIntValue("state");
-            float  effect = paramaters.getFloat("effect");
-            float  operationPerformance = paramaters.getFloat("operationPerformance");
-            float  culturalEnvir = paramaters.getFloat("culturalEnvir");
-            float  decorationMaterial = paramaters.getFloat("decorationMaterial");
-            float  decorationTechnology = paramaters.getFloat("decorationTechnology");
-            float  physicalEnvir = paramaters.getFloat("physicalEnvir");
-            float grade = paramaters.getFloat("grade");
+            JSONObject parameters = JsonUtil.getRequestJsonObject(request);
+            Long projectId = parameters.getLong("projectId");
+            Long expertId = parameters.getLong("expertId");
+            int state = parameters.getIntValue("state");
+            float  effect = parameters.getFloat("effect");
+            float  operationPerformance = parameters.getFloat("operationPerformance");
+            float  culturalEnvir = parameters.getFloat("culturalEnvir");
+            float  decorationMaterial = parameters.getFloat("decorationMaterial");
+            float  decorationTechnology = parameters.getFloat("decorationTechnology");
+            float  physicalEnvir = parameters.getFloat("physicalEnvir");
+            float grade = parameters.getFloat("grade");
 
             EnvirBenefit4 envirBenefit4= new EnvirBenefit4();
             envirBenefit4.setExpertId(expertId);
@@ -626,8 +626,10 @@ public class ExpertCtrl
                         result.put("avgResourceUtilization", avgScore1.get("avgResourceUtilization"));
                         if (state == 1)
                             result.put("grade", project1.getfGrade());
-                        else
+                        else if(state == 2)
                             result.put("grade", project1.getlGrade());
+                        else
+                            result.put("grade", project1.getFinalGrade());
                     }
                     else
                     {
@@ -661,8 +663,10 @@ public class ExpertCtrl
                         result.put("avgLandUsing", avgScore2.get("avgLandUsing"));
                         if(state == 1)
                             result.put("grade", project2.getfGrade());
-                        else
+                        else if(state == 2)
                             result.put("grade", project2.getlGrade());
+                        else
+                            result.put("grade", project2.getFinalGrade());
                     }
                     else
                     {
@@ -695,8 +699,10 @@ public class ExpertCtrl
                         result.put("avgProjectTechnology", avgScore3.get("avgProjectTechnology"));
                         if(state == 1)
                             result.put("grade", project3.getfGrade());
-                        else
+                        else if(state == 2)
                             result.put("grade", project3.getlGrade());
+                        else
+                            result.put("grade", project3.getFinalGrade());
                     }
                     else
                     {
@@ -729,8 +735,10 @@ public class ExpertCtrl
                         result.put("avgDecorationTechnology", avgScore4.get("avgDecorationTechnology"));
                         if(state == 1)
                             result.put("grade", project4.getfGrade());
-                        else
+                        else if(state == 2)
                             result.put("grade", project4.getlGrade());
+                        else
+                            result.put("grade", project4.getFinalGrade());
                     }
                     else
                     {

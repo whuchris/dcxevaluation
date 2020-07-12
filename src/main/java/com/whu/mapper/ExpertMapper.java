@@ -15,6 +15,7 @@ public interface ExpertMapper
      * 根据专家id查询专家
      * @param id 专家id
      * @return 返回的专家
+     * @Use: ExpertService
      */
     @Results({
             @Result(id = true, column = "id", property = "id"),
@@ -52,6 +53,15 @@ public interface ExpertMapper
      */
     @Select("SELECT * FROM t_expert WHERE user_name = #{username}")
     Expert queryExpertByUsername(String username);
+
+    /**
+     * 根据专家姓名返回专家信息
+     * @param name 专家姓名
+     * @return 专家信息
+     * @use ProjectAssignmentService:根据项目列表里面的专家姓名返回专家的id
+     */
+    @Select("SELECT * FROM t_expert WHERE name = #{name}")
+    Expert queryExpertByName(String name);
 
     /**
      * 更新专家信息

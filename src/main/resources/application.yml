@@ -3,11 +3,14 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
 
-    url: jdbc:mysql://47.96.89.99:3306/dcxevaluation?serverTimezone=Hongkong&allowMultiQueries=true #阿里服务器 3426
-    password: ytaotao
+    #url: jdbc:mysql://47.96.89.99:3306/dcxevaluation?serverTimezone=Hongkong&allowMultiQueries=true #阿里服务器 15830
+    #password: ytaotao
 
     #url: jdbc:mysql://125.220.157.101:3306/dcxevaluation?serverTimezone=Hongkong  #学院服务器
     #password: password
+
+    url: jdbc:mysql://49.235.133.12:3306/dcxevaluation?serverTimezone=Hongkong  #腾讯服务器 18885
+    password: chris164815
 
     #url: jdbc:mysql://localhost:3306/dcxevaluation?serverTimezone=Hongkong&allowMultiQueries=true
     #password: 164815
@@ -39,7 +42,7 @@ spring:
     useGlobalDataSourceStat: true
 
 server:
-  port: 2020
+  port: 8080
   servlet:
     # 统一在 url 加上 /fcxevaluation 前缀
     context-path: /dcxevaluation
